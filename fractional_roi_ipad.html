@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Vista móvil / iPad -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fractional ROI">
+    <title>Fractional Rental & Growth Calculator</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --accent: #0077b6;
+            --border-soft: #dddddd;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 12px 16px 24px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 8px 0 4px;
+            font-size: clamp(1.4rem, 2vw + 1rem, 2rem);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin: 0 0 14px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* PANEL DE INPUTS: GRID RESPONSIVO */
+        .inputs {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.09);
+        }
+
+        @media (max-width: 900px) {
+            .inputs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 10px 12px;
+            font-size: 16px; /* 16px para que iOS no haga zoom raro */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.15);
+        }
+
+        #results,
+        .chart-section {
+            background: var(--card-bg);
+            padding: 16px 16px 18px;
+            border-radius: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.09);
+            margin-bottom: 16px;
+        }
+
+        #results p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .chart-section h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        canvas {
+            width: 100% !important;
+            max-height: 320px;
+        }
+
+        #propTotal {
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* TABLA: ENVUELTA EN UN CONTENEDOR SCROLLABLE PARA IPAD */
+        .income-table-wrapper {
+            margin-top: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #incomeTable {
+            width: 100%;
+            min-width: 520px; /* para que en pantallas pequeñas funcione el scroll horizontal */
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        #incomeTable th,
+        #incomeTable td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            text-align: right;
+        }
+
+        #incomeTable th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        #gainSummary p {
+            margin: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #777;
+            margin-top: 12px;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <div class="container">
+        <h1>Fractional Rental &amp; Growth Calculator</h1>
+        <p class="subtitle">Pensado para usarse cómodamente en iPad y otros dispositivos táctiles.</p>
+
+        <div class="inputs">
+            <div class="input-group">
+                <label for="propertyValue">Property value (USD)</label>
+                <input type="number" id="propertyValue" value="150000" min="0" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="weeklyRent">Weekly rental price (USD)</label>
+                <input type="number" id="weeklyRent" value="3700" min="0" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="growthRate">Annual growth rate (%)</label>
+                <input type="number" id="growthRate" value="24" min="0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label for="years">Projection years</label>
+                <input type="number" id="years" value="10" min="1" max="50" step="1">
+            </div>
+            <div class="input-group">
+                <label for="currency">Display currency</label>
+                <select id="currency">
+                    <option value="USD">USD</option>
+                    <option value="MXN">MXN</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="weeksSelect">Weeks per year</label>
+                <select id="weeksSelect">
+                    <option value="1">1 week</option>
+                    <option value="2">2 weeks</option>
+                    <option value="3">3 weeks</option>
+                    <option value="4">4 weeks</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="results">
+            <p><strong>Exchange rate (USD to MXN):</strong> <span id="rateDisplay">Fetching...</span></p>
+            <p><strong>Current weekly rent:</strong> <span id="currentWeeklyDisplay">-</span></p>
+            <p><strong>Annual rental income (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
+        </div>
+
+        <div class="chart-section">
+            <h3>Property Value Projection</h3>
+            <canvas id="growthChart"></canvas>
+            <div id="propTotal"></div>
+        </div>
+
+        <div class="chart-section">
+            <h3>Rental Income Projection</h3>
+            <canvas id="incomeChart"></canvas>
+
+            <div class="income-table-wrapper">
+                <div id="incomeTableContainer"></div>
+            </div>
+
+            <div id="gainSummary" style="margin-top: 10px;"></div>
+        </div>
+
+        <footer>
+            <p>
+                Exchange rates provided by
+                <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">
+                    fawazahmed0/exchange-api
+                </a>. Growth rate applies to both property value and rental price for projection.
+            </p>
+        </footer>
+    </div>
+</div>
+
+<script>
+    let exchangeRate = null;
+    let growthChart, incomeChart;
+
+    async function fetchExchangeRate() {
+        try {
+            const response = await fetch(
+                'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json'
+            );
+            const data = await response.json();
+            exchangeRate = data.usd.mxn;
+            document.getElementById('rateDisplay').textContent =
+                exchangeRate.toFixed(4) + ' (as of ' + data.date + ')';
+            compute();
+        } catch (error) {
+            document.getElementById('rateDisplay').textContent = 'Unable to retrieve rate';
+            console.error(error);
+        }
+    }
+
+    function compute() {
+        const propertyValueUSD = parseFloat(document.getElementById('propertyValue').value) || 0;
+        const weeklyRentUSD0 = parseFloat(document.getElementById('weeklyRent').value) || 0;
+        const growthRate = parseFloat(document.getElementById('growthRate').value) || 0;
+        const years = parseInt(document.getElementById('years').value) || 0;
+        const currency = document.getElementById('currency').value;
+        const weeksSelected = parseInt(document.getElementById('weeksSelect').value) || 1;
+
+        // Weekly rent year 0
+        const weeklyRentUSD_current = weeklyRentUSD0;
+        const weeklyRentMXN_current = exchangeRate ? weeklyRentUSD0 * exchangeRate : null;
+        let weeklyRentDisplay;
+        let incomeYear1;
+
+        if (currency === 'USD') {
+            weeklyRentDisplay = '$' + weeklyRentUSD_current.toFixed(2) + ' USD';
+            incomeYear1 = (weeklyRentUSD_current * weeksSelected).toFixed(2) + ' USD';
+        } else {
+            const weeklyMXN = weeklyRentMXN_current;
+            weeklyRentDisplay = '$' + (weeklyMXN ? weeklyMXN.toFixed(2) : '…') + ' MXN';
+            const annualMXN = weeklyMXN ? weeklyMXN * weeksSelected : null;
+            incomeYear1 = annualMXN ? annualMXN.toFixed(2) + ' MXN' : '…';
+        }
+
+        document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
+        document.getElementById('annualIncomeYear1').textContent = incomeYear1;
+
+        // Arrays
+        const labels = [];
+        const propSeries = [];
+        const rentSeries = [];
+        const incomeSeries = [];
+
+        for (let i = 0; i <= years; i++) {
+            labels.push(i);
+
+            const propValUSD = propertyValueUSD * Math.pow(1 + growthRate / 100, i);
+            const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
+            const incomeUSD = rentUSD * weeksSelected;
+
+            if (currency === 'USD') {
+                propSeries.push(parseFloat(propValUSD.toFixed(2)));
+                rentSeries.push(parseFloat(rentUSD.toFixed(2)));
+                incomeSeries.push(parseFloat(incomeUSD.toFixed(2)));
+            } else {
+                const propValMXN = exchangeRate ? propValUSD * exchangeRate : null;
+                const rentMXN = exchangeRate ? rentUSD * exchangeRate : null;
+                const incomeMXN = exchangeRate ? incomeUSD * exchangeRate : null;
+                propSeries.push(propValMXN ? parseFloat(propValMXN.toFixed(2)) : null);
+                rentSeries.push(rentMXN ? parseFloat(rentMXN.toFixed(2)) : null);
+                incomeSeries.push(incomeMXN ? parseFloat(incomeMXN.toFixed(2)) : null);
+            }
+        }
+
+        // Growth chart
+        const newGrowthLabel =
+            currency === 'USD' ? 'Property value (USD)' : 'Property value (MXN)';
+
+        if (growthChart) {
+            growthChart.data.labels = labels;
+            growthChart.data.datasets[0].data = propSeries;
+            growthChart.data.datasets[0].label = newGrowthLabel;
+            growthChart.options.scales.y.title.text = 'Property value (' + currency + ')';
+            growthChart.update();
+        } else {
+            const ctxG = document.getElementById('growthChart').getContext('2d');
+            growthChart = new Chart(ctxG, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: newGrowthLabel,
+                            data: propSeries,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Years'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Property value (' + currency + ')'
+                            },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        const propTotalElem = document.getElementById('propTotal');
+        const finalPropValue = propSeries[propSeries.length - 1] || 0;
+        const formattedPropTotal = finalPropValue.toFixed(2);
+        propTotalElem.innerHTML =
+            '<strong>Property value after ' +
+            years +
+            ' year' +
+            (years !== 1 ? 's' : '') +
+            ' (' +
+            currency +
+            '):</strong> ' +
+            formattedPropTotal;
+
+        // Income chart
+        const weeksLabel =
+            weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
+
+        if (incomeChart) {
+            incomeChart.data.labels = labels;
+            incomeChart.data.datasets[0].data = incomeSeries;
+            incomeChart.data.datasets[0].label = weeksLabel;
+            incomeChart.options.scales.y.title.text =
+                'Annual rental income (' + currency + ')';
+            incomeChart.update();
+        } else {
+            const ctxI = document.getElementById('incomeChart').getContext('2d');
+            incomeChart = new Chart(ctxI, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: weeksLabel,
+                            data: incomeSeries,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Years'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Annual rental income (' + currency + ')'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tabla
+        let tableHTML =
+            '<table id="incomeTable"><thead><tr>' +
+            '<th>Year</th>' +
+            '<th>Weekly rent (' +
+            currency +
+            ')</th>' +
+            '<th>' +
+            weeksSelected +
+            'w income (' +
+            currency +
+            ')</th>' +
+            '</tr></thead><tbody>';
+
+        for (let i = 0; i <= years; i++) {
+            tableHTML += '<tr>';
+            tableHTML += '<td style="text-align:center">' + i + '</td>';
+
+            const rentVal = rentSeries[i];
+            const incomeVal = incomeSeries[i];
+
+            tableHTML += '<td>' + (rentVal !== null ? rentVal.toFixed(2) : '…') + '</td>';
+            tableHTML += '<td>' + (incomeVal !== null ? incomeVal.toFixed(2) : '…') + '</td>';
+            tableHTML += '</tr>';
+        }
+
+        tableHTML += '</tbody></table>';
+
+        const totalIncome = incomeSeries.reduce((sum, val) => sum + (val || 0), 0);
+        document.getElementById('incomeTableContainer').innerHTML = tableHTML;
+
+        // Resumen de ganancias
+        const gainSummaryElem = document.getElementById('gainSummary');
+        const initialProp = propSeries[0] || 0;
+        const finalProp = propSeries[propSeries.length - 1] || 0;
+        const propertyGain = finalProp - initialProp;
+        const combinedGain = propertyGain + totalIncome;
+
+        const formattedPropGain = propertyGain.toFixed(2);
+        const formattedTotalIncome = totalIncome.toFixed(2);
+        const formattedCombinedGain = combinedGain.toFixed(2);
+
+        let summaryHTML = '';
+        summaryHTML +=
+            '<p><strong>Property appreciation over ' +
+            years +
+            ' year' +
+            (years !== 1 ? 's' : '') +
+            ':</strong> ' +
+            formattedPropGain +
+            ' ' +
+            currency +
+            '</p>';
+        summaryHTML +=
+            '<p><strong>Total rental income over ' +
+            years +
+            ' year' +
+            (years !== 1 ? 's' : '') +
+            ':</strong> ' +
+            formattedTotalIncome +
+            ' ' +
+            currency +
+            '</p>';
+        summaryHTML +=
+            '<p><strong>Combined gain (property appreciation + rental income):</strong> ' +
+            formattedCombinedGain +
+            ' ' +
+            currency +
+            '</p>';
+
+        gainSummaryElem.innerHTML = summaryHTML;
+    }
+
+    // Listeners
+    document.getElementById('propertyValue').addEventListener('input', compute);
+    document.getElementById('weeklyRent').addEventListener('input', compute);
+    document.getElementById('growthRate').addEventListener('input', compute);
+    document.getElementById('years').addEventListener('input', compute);
+    document.getElementById('currency').addEventListener('change', compute);
+    document.getElementById('weeksSelect').addEventListener('change', compute);
+
+    fetchExchangeRate();
+</script>
+</body>
+</html>
