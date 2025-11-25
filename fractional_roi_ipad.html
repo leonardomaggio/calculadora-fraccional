@@ -26,9 +26,6 @@
         .inputs {
             display: flex;
             flex-wrap: wrap;
-            /* Center the input groups rather than stretching them to the edges.  Using
-               justify-content:center gives a balanced layout regardless of the number
-               of controls per row. */
             justify-content: center;
             gap: 20px;
             margin-bottom: 20px;
@@ -45,7 +42,6 @@
         .input-group label {
             margin-bottom: 6px;
             font-weight: bold;
-            /* Allow long labels like "Weekly return of investment" to wrap cleanly */
             white-space: normal;
             word-break: break-word;
         }
@@ -135,14 +131,12 @@
         <div class="chart-section">
             <h3>Property Value Projection</h3>
             <canvas id="growthChart" height="200"></canvas>
-            <!-- Container to display total property value over the projection period -->
             <div id="propTotal"></div>
         </div>
         <div class="chart-section">
             <h3>Return of Investment Income Projection</h3>
             <canvas id="incomeChart" height="200"></canvas>
             <div id="incomeTableContainer"></div>
-            <!-- Container for combined gain summary -->
             <div id="gainSummary" style="margin-top:15px;"></div>
         </div>
         <footer>
@@ -175,7 +169,6 @@
             const currency = document.getElementById('currency').value;
             const weeksSelected = parseInt(document.getElementById('weeksSelect').value) || 1;
 
-            // Weekly rent and incomes for year 0
             const weeklyRentUSD_current = weeklyRentUSD0;
             const weeklyRentMXN_current = exchangeRate ? weeklyRentUSD0 * exchangeRate : null;
             let weeklyRentDisplay;
@@ -192,7 +185,6 @@
             document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
             document.getElementById('annualIncomeYear1').textContent = incomeYear1;
 
-            // Arrays
             const labels = [];
             const propSeries = [];
             const rentSeries = [];
@@ -200,13 +192,9 @@
 
             for (let i = 0; i <= years; i++) {
                 labels.push(i);
-                // Property value in USD
                 const propValUSD = propertyValueUSD * Math.pow(1 + growthRate / 100, i);
-                // Weekly rent in USD
                 const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
-                // Income for selected weeks in USD
                 const incomeUSD = rentUSD * weeksSelected;
-                // Convert values based on selected currency
                 if (currency === 'USD') {
                     propSeries.push(parseFloat(propValUSD.toFixed(2)));
                     rentSeries.push(parseFloat(rentUSD.toFixed(2)));
@@ -221,14 +209,11 @@
                 }
             }
 
-            // Update growth chart
             const newGrowthLabel = currency === 'USD' ? 'Property value (USD)' : 'Property value (MXN)';
             if (growthChart) {
-                // Update data and dataset label
                 growthChart.data.labels = labels;
                 growthChart.data.datasets[0].data = propSeries;
                 growthChart.data.datasets[0].label = newGrowthLabel;
-                // Update y-axis title to reflect current currency
                 growthChart.options.scales.y.title.text = 'Property value (' + currency + ')';
                 growthChart.update();
             } else {
@@ -255,16 +240,10 @@
                         },
                         scales: {
                             x: {
-                                title: {
-                                    display: true,
-                                    text: 'Years'
-                                }
+                                title: { display: true, text: 'Years' }
                             },
                             y: {
-                                title: {
-                                    display: true,
-                                    text: 'Property value (' + currency + ')'
-                                },
+                                title: { display: true, text: 'Property value (' + currency + ')' },
                                 beginAtZero: false
                             }
                         }
@@ -272,20 +251,16 @@
                 });
             }
 
-            // Display final property value (at the end of projection) below the property chart
             const propTotalElem = document.getElementById('propTotal');
             const finalPropValue = propSeries[propSeries.length - 1] || 0;
-            // Format the final value
             const formattedPropTotal = finalPropValue.toFixed(2);
             propTotalElem.innerHTML = '<strong>Property value after ' + years + ' year' + (years !== 1 ? 's' : '') + ' (' + currency + '):</strong> ' + formattedPropTotal;
 
-            // Update income chart
             const weeksLabel = weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
             if (incomeChart) {
                 incomeChart.data.labels = labels;
                 incomeChart.data.datasets[0].data = incomeSeries;
                 incomeChart.data.datasets[0].label = weeksLabel;
-                // Update y-axis title to reflect current currency and ROI terminology
                 incomeChart.options.scales.y.title.text = 'Annual return of investment income (' + currency + ')';
                 incomeChart.update();
             } else {
@@ -311,17 +286,9 @@
                             intersect: false,
                         },
                         scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Years'
-                                }
-                            },
+                            x: { title: { display: true, text: 'Years' } },
                             y: {
-                                title: {
-                                    display: true,
-                                    text: 'Annual return of investment income (' + currency + ')'
-                                },
+                                title: { display: true, text: 'Annual return of investment income (' + currency + ')' },
                                 beginAtZero: true
                             }
                         }
@@ -329,7 +296,6 @@
                 });
             }
 
-            // Build table
             let tableHTML = '<table id="incomeTable"><thead><tr>';
             tableHTML += '<th>Year</th>';
             tableHTML += '<th>Weekly ROI (' + currency + ')</th>';
@@ -345,21 +311,19 @@
                 tableHTML += '</tr>';
             }
             tableHTML += '</tbody></table>';
-            // Calculate total income across all projection years
             const totalIncome = incomeSeries.reduce((sum, val) => sum + (val || 0), 0);
             document.getElementById('incomeTableContainer').innerHTML = tableHTML;
 
-            // Update gain summary: property gain + rental income and show totals
             const gainSummaryElem = document.getElementById('gainSummary');
-            // Initial property value is the value at year 0 in the current currency
             const initialProp = propSeries[0] || 0;
             const finalProp = propSeries[propSeries.length - 1] || 0;
             const propertyGain = finalProp - initialProp;
             const combinedGain = propertyGain + totalIncome;
-            // Format values to two decimals
+
             const formattedPropGain = propertyGain.toFixed(2);
             const formattedTotalIncome = totalIncome.toFixed(2);
             const formattedCombinedGain = combinedGain.toFixed(2);
+
             let summaryHTML = '';
             summaryHTML += '<p><strong>Property appreciation over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedPropGain + ' ' + currency + '</p>';
             summaryHTML += '<p><strong>Total return of investment income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
@@ -367,7 +331,6 @@
             gainSummaryElem.innerHTML = summaryHTML;
         }
 
-        // Populate weeks 1–52 (default 4 weeks)
         const weeksSelectElem = document.getElementById('weeksSelect');
         for (let i = 1; i <= 52; i++) {
             const option = document.createElement('option');
@@ -377,7 +340,6 @@
         }
         weeksSelectElem.value = '4';
 
-        // Event listeners
         document.getElementById('propertyValue').addEventListener('input', compute);
         document.getElementById('weeklyRent').addEventListener('input', compute);
         document.getElementById('growthRate').addEventListener('input', compute);
