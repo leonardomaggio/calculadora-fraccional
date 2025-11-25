@@ -8,8 +8,8 @@ Diferencias
 Registros
 
 fractional_roi_ipad.html
-+74
--21
++112
+-23
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +17,10 @@ fractional_roi_ipad.html
     <meta charset="UTF-8">
     <!-- Vista móvil / iPad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Fractional ROI">
     <title>Fractional Rental & Growth Calculator</title>
@@ -46,8 +50,92 @@ fractional_roi_ipad.html
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
             background: var(--bg);
             color: var(--text-main);
+            -webkit-text-size-adjust: 100%;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+                env(safe-area-inset-left);
         }
-@@ -167,196 +167,203 @@
+
+        .app-shell {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 12px 16px 24px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 8px 0 4px;
+            font-size: clamp(1.4rem, 2vw + 1rem, 2rem);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin: 0 0 14px;
+            font-size: 0.9rem;
+            color: #666;
+@@ -108,50 +114,51 @@
+            box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.15);
+        }
+
+        #results,
+        .chart-section {
+            background: var(--card-bg);
+            padding: 16px 16px 18px;
+            border-radius: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.09);
+            margin-bottom: 16px;
+        }
+
+        #results p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .chart-section h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100%;
+            max-height: 320px;
+        }
+
+        #propTotal {
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* TABLA: ENVUELTA EN UN CONTENEDOR SCROLLABLE PARA IPAD */
+        .income-table-wrapper {
+            margin-top: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #incomeTable {
+            width: 100%;
+            min-width: 520px; /* para que en pantallas pequeñas funcione el scroll horizontal */
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        #incomeTable th,
+        #incomeTable td {
+            border: 1px solid #ddd;
+@@ -162,201 +169,237 @@
+        #incomeTable th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
         #gainSummary p {
             margin: 4px 0;
             font-size: 0.9rem;
@@ -67,6 +155,35 @@ fractional_roi_ipad.html
 
         footer a:hover {
             text-decoration: underline;
+        }
+
+        /* Ajustes específicos para iPhone / pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px 12px 18px;
+            }
+
+            h1 {
+                font-size: clamp(1.2rem, 5vw + 1rem, 1.6rem);
+            }
+
+            .inputs {
+                gap: 12px;
+            }
+
+            .input-group label {
+                font-size: 0.85rem;
+            }
+
+            .input-group input,
+            .input-group select {
+                font-size: 16px;
+                padding: 10px 11px;
+            }
+
+            canvas {
+                max-height: 280px;
+            }
         }
     </style>
 </head>
@@ -111,6 +228,7 @@ fractional_roi_ipad.html
                     <option value="3">3 weeks</option>
                     <option value="4">4 weeks</option>
                 </select>
+                <label for="weeksSelect">Weeks per year (up to 52)</label>
                 <select id="weeksSelect"></select>
             </div>
             <div class="input-group">
@@ -265,7 +383,7 @@ fractional_roi_ipad.html
                             tension: 0.1
                         }
                     ]
-@@ -387,154 +394,200 @@
+@@ -387,154 +430,200 @@
             });
         }
 
@@ -465,7 +583,7 @@ fractional_roi_ipad.html
         option.textContent = i + ' week' + (i > 1 ? 's' : '');
         weeksSelect.appendChild(option);
     }
-    weeksSelect.value = '4';
+    weeksSelect.value = '52';
 
     fetchExchangeRate();
 </script>
