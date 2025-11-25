@@ -257,9 +257,7 @@
             "mx-csl": {
                 id: "mx-csl",
                 name: "Cabo San Lucas, Baja California Sur, Mexico",
-                // este valor ya no manda, usamos el promedio del history,
-                // pero lo dejamos como respaldo:
-                avgGrowth10y: 0.188,
+                avgGrowth10y: 0.24, // valor de respaldo; el promedio real se calcula con history
                 history: [
                     { year: 2015, rate: 0.12 },
                     { year: 2016, rate: 0.13 },
@@ -596,7 +594,7 @@
                 });
             }
 
-            // 6) Recalcular la calculadora con este growthRate
+            // 6) Recalcular toda la app con el nuevo growthRate
             compute();
         }
 
