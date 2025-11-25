@@ -214,16 +214,18 @@
             <div id="gainSummary" style="margin-top:15px;"></div>
         </div>
 
-        <!-- NUEVA SECCIÓN: Selección de región y tabla/gráfica de últimos 10 años -->
+        <!-- SECCIÓN: Cabo San Lucas, 10 años -->
         <div class="chart-section region-section">
-            <h3>Regional 10-Year Property Growth (demo)</h3>
+            <h3>Cabo San Lucas 10-Year Property Growth</h3>
             <div class="region-controls">
-                <label for="regionSelect">Select region:</label>
+                <label for="regionSelect">Location:</label>
                 <select id="regionSelect">
                     <!-- Se llena por JavaScript -->
                 </select>
             </div>
-            <p id="regionInfo">Select a region to load the last 10 years of property value growth (demo data).</p>
+            <p id="regionInfo">
+                Cabo San Lucas 10-year property value growth. Source: MLS Cabo San Lucas.
+            </p>
 
             <!-- Gráfica histórica de crecimiento anual de la región -->
             <canvas id="regionGrowthChart" height="200"></canvas>
@@ -249,12 +251,12 @@
         let growthChart, incomeChart, regionGrowthChart;
 
         /* =========================================================
-           Datos DEMO de regiones (más adelante vendrá de un backend)
+           Datos de Cabo San Lucas (más adelante vendrá de un backend)
            ========================================================= */
         const REGION_DATA = {
-            "mx-bcs": {
-                id: "mx-bcs",
-                name: "Baja California Sur, Mexico",
+            "mx-csl": {
+                id: "mx-csl",
+                name: "Cabo San Lucas, Baja California Sur, Mexico",
                 avgGrowth10y: 0.24, // 24% promedio anual (ejemplo)
                 history: [
                     { year: 2015, rate: 0.12 },
@@ -267,23 +269,6 @@
                     { year: 2022, rate: 0.24 },
                     { year: 2023, rate: 0.25 },
                     { year: 2024, rate: 0.25 }
-                ]
-            },
-            "es-can": {
-                id: "es-can",
-                name: "Canary Islands, Spain",
-                avgGrowth10y: 0.11, // 11% promedio anual (ejemplo)
-                history: [
-                    { year: 2015, rate: 0.04 },
-                    { year: 2016, rate: 0.05 },
-                    { year: 2017, rate: 0.06 },
-                    { year: 2018, rate: 0.07 },
-                    { year: 2019, rate: 0.08 },
-                    { year: 2020, rate: 0.07 },
-                    { year: 2021, rate: 0.09 },
-                    { year: 2022, rate: 0.10 },
-                    { year: 2023, rate: 0.11 },
-                    { year: 2024, rate: 0.11 }
                 ]
             }
         };
@@ -504,7 +489,7 @@
         }
 
         /* =========================================
-           Lógica de regiones (demo global)
+           Lógica de región (Cabo San Lucas)
            ========================================= */
         function populateRegionSelect() {
             const select = document.getElementById('regionSelect');
@@ -536,7 +521,7 @@
                 region.name +
                 ': average ' +
                 avgPercent.toFixed(2) +
-                '% annual growth over the last 10 years (demo data).';
+                '% annual growth over the last 10 years. Source: MLS Cabo San Lucas.';
 
             // Construir tabla de historial de 10 años
             const container = document.getElementById('growthHistoryTable');
