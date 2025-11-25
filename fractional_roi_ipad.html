@@ -83,17 +83,85 @@
             background-color: #f2f2f2;
             text-align: center;
         }
+        /* Sección de regiones y tabla de 10 años */
+        .region-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .region-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .region-controls label {
+            font-weight: bold;
+        }
+        .region-controls select {
+            padding: 6px 8px;
+            font-size: 0.95rem;
+        }
+        #regionInfo {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .growth-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .growth-table th,
+        .growth-table td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            text-align: right;
+        }
+        .growth-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .growth-table td:first-child {
+            text-align: center;
+        }
+        /* Bloque de publicidad */
+        .ad-slot {
+            background: #fffbe6;
+            border: 1px dashed #f0c36d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7a5a00;
+        }
+        .ad-slot small {
+            display: block;
+            margin-top: 6px;
+            color: #aa7a00;
+        }
         footer {
             text-align: center;
             font-size: 0.8rem;
             color: #666;
             margin: 20px 0;
         }
+        footer a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>property management return of investment</h1>
+
+        <!-- Panel de inputs principal -->
         <div class="inputs">
             <div class="input-group">
                 <label for="propertyValue">Property value (USD)</label>
@@ -123,22 +191,54 @@
                 <select id="weeksSelect"></select>
             </div>
         </div>
+
+        <!-- Resultados de tipo resumen -->
         <div id="results">
             <p><strong>Exchange rate (USD to MXN):</strong> <span id="rateDisplay">Fetching...</span></p>
             <p><strong>Current weekly return of investment:</strong> <span id="currentWeeklyDisplay">-</span></p>
             <p><strong>Annual return of investment (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
         </div>
+
+        <!-- Gráfica de valor de la propiedad -->
         <div class="chart-section">
             <h3>Property Value Projection</h3>
             <canvas id="growthChart" height="200"></canvas>
             <div id="propTotal"></div>
         </div>
+
+        <!-- Gráfica de ingreso por ROI -->
         <div class="chart-section">
             <h3>Return of Investment Income Projection</h3>
             <canvas id="incomeChart" height="200"></canvas>
             <div id="incomeTableContainer"></div>
             <div id="gainSummary" style="margin-top:15px;"></div>
         </div>
+
+        <!-- NUEVA SECCIÓN: Selección de región y tabla/gráfica de últimos 10 años -->
+        <div class="chart-section region-section">
+            <h3>Regional 10-Year Property Growth (demo)</h3>
+            <div class="region-controls">
+                <label for="regionSelect">Select region:</label>
+                <select id="regionSelect">
+                    <!-- Se llena por JavaScript -->
+                </select>
+            </div>
+            <p id="regionInfo">Select a region to load the last 10 years of property value growth (demo data).</p>
+
+            <!-- Gráfica histórica de crecimiento anual de la región -->
+            <canvas id="regionGrowthChart" height="200"></canvas>
+
+            <!-- Tabla de historial 10 años -->
+            <div id="growthHistoryTable"></div>
+        </div>
+
+        <!-- ESPACIO PARA PUBLICIDAD -->
+        <div id="adSlot" class="ad-slot">
+            <strong>Sponsored space</strong>
+            <div>Place your ad banner or partner promotion here.</div>
+            <small>(This is a placeholder. Here you can later insert Google AdSense, house ads, or sponsors.)</small>
+        </div>
+
         <footer>
             <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and the return of investment income for projection purposes.</p>
         </footer>
@@ -146,8 +246,51 @@
 
     <script>
         let exchangeRate = null;
-        let growthChart, incomeChart;
+        let growthChart, incomeChart, regionGrowthChart;
 
+        /* =========================================================
+           Datos DEMO de regiones (más adelante vendrá de un backend)
+           ========================================================= */
+        const REGION_DATA = {
+            "mx-bcs": {
+                id: "mx-bcs",
+                name: "Baja California Sur, Mexico",
+                avgGrowth10y: 0.24, // 24% promedio anual (ejemplo)
+                history: [
+                    { year: 2015, rate: 0.12 },
+                    { year: 2016, rate: 0.13 },
+                    { year: 2017, rate: 0.14 },
+                    { year: 2018, rate: 0.16 },
+                    { year: 2019, rate: 0.18 },
+                    { year: 2020, rate: 0.19 },
+                    { year: 2021, rate: 0.22 },
+                    { year: 2022, rate: 0.24 },
+                    { year: 2023, rate: 0.25 },
+                    { year: 2024, rate: 0.25 }
+                ]
+            },
+            "es-can": {
+                id: "es-can",
+                name: "Canary Islands, Spain",
+                avgGrowth10y: 0.11, // 11% promedio anual (ejemplo)
+                history: [
+                    { year: 2015, rate: 0.04 },
+                    { year: 2016, rate: 0.05 },
+                    { year: 2017, rate: 0.06 },
+                    { year: 2018, rate: 0.07 },
+                    { year: 2019, rate: 0.08 },
+                    { year: 2020, rate: 0.07 },
+                    { year: 2021, rate: 0.09 },
+                    { year: 2022, rate: 0.10 },
+                    { year: 2023, rate: 0.11 },
+                    { year: 2024, rate: 0.11 }
+                ]
+            }
+        };
+
+        /* =========================================
+           Carga de tipo de cambio USD -> MXN
+           ========================================= */
         async function fetchExchangeRate() {
             try {
                 const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
@@ -161,6 +304,9 @@
             }
         }
 
+        /* =========================================
+           Cálculos principales de la calculadora
+           ========================================= */
         function compute() {
             const propertyValueUSD = parseFloat(document.getElementById('propertyValue').value) || 0;
             const weeklyRentUSD0 = parseFloat(document.getElementById('weeklyRent').value) || 0;
@@ -169,6 +315,7 @@
             const currency = document.getElementById('currency').value;
             const weeksSelected = parseInt(document.getElementById('weeksSelect').value) || 1;
 
+            // Weekly rent and incomes for year 0
             const weeklyRentUSD_current = weeklyRentUSD0;
             const weeklyRentMXN_current = exchangeRate ? weeklyRentUSD0 * exchangeRate : null;
             let weeklyRentDisplay;
@@ -185,6 +332,7 @@
             document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
             document.getElementById('annualIncomeYear1').textContent = incomeYear1;
 
+            // Arrays para las gráficas
             const labels = [];
             const propSeries = [];
             const rentSeries = [];
@@ -192,9 +340,13 @@
 
             for (let i = 0; i <= years; i++) {
                 labels.push(i);
+                // Property value in USD
                 const propValUSD = propertyValueUSD * Math.pow(1 + growthRate / 100, i);
+                // Weekly rent in USD
                 const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
+                // Income for selected weeks in USD
                 const incomeUSD = rentUSD * weeksSelected;
+
                 if (currency === 'USD') {
                     propSeries.push(parseFloat(propValUSD.toFixed(2)));
                     rentSeries.push(parseFloat(rentUSD.toFixed(2)));
@@ -209,6 +361,7 @@
                 }
             }
 
+            // Gráfica de valor de propiedad
             const newGrowthLabel = currency === 'USD' ? 'Property value (USD)' : 'Property value (MXN)';
             if (growthChart) {
                 growthChart.data.labels = labels;
@@ -251,11 +404,13 @@
                 });
             }
 
+            // Valor final de la propiedad
             const propTotalElem = document.getElementById('propTotal');
             const finalPropValue = propSeries[propSeries.length - 1] || 0;
             const formattedPropTotal = finalPropValue.toFixed(2);
             propTotalElem.innerHTML = '<strong>Property value after ' + years + ' year' + (years !== 1 ? 's' : '') + ' (' + currency + '):</strong> ' + formattedPropTotal;
 
+            // Gráfica de ingreso anual por ROI
             const weeksLabel = weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
             if (incomeChart) {
                 incomeChart.data.labels = labels;
@@ -296,6 +451,7 @@
                 });
             }
 
+            // Tabla de ingreso por año
             let tableHTML = '<table id="incomeTable"><thead><tr>';
             tableHTML += '<th>Year</th>';
             tableHTML += '<th>Weekly ROI (' + currency + ')</th>';
@@ -314,6 +470,7 @@
             const totalIncome = incomeSeries.reduce((sum, val) => sum + (val || 0), 0);
             document.getElementById('incomeTableContainer').innerHTML = tableHTML;
 
+            // Resumen de ganancias
             const gainSummaryElem = document.getElementById('gainSummary');
             const initialProp = propSeries[0] || 0;
             const finalProp = propSeries[propSeries.length - 1] || 0;
@@ -331,22 +488,137 @@
             gainSummaryElem.innerHTML = summaryHTML;
         }
 
-        const weeksSelectElem = document.getElementById('weeksSelect');
-        for (let i = 1; i <= 52; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i + ' week' + (i > 1 ? 's' : '');
-            weeksSelectElem.appendChild(option);
+        /* =========================================
+           Poblado de weeksSelect (1 a 52 semanas)
+           ========================================= */
+        function initWeeksSelect() {
+            const weeksSelectElem = document.getElementById('weeksSelect');
+            weeksSelectElem.innerHTML = '';
+            for (let i = 1; i <= 52; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + ' week' + (i > 1 ? 's' : '');
+                weeksSelectElem.appendChild(option);
+            }
+            weeksSelectElem.value = '4';
         }
-        weeksSelectElem.value = '4';
 
+        /* =========================================
+           Lógica de regiones (demo global)
+           ========================================= */
+        function populateRegionSelect() {
+            const select = document.getElementById('regionSelect');
+            select.innerHTML = '';
+            const keys = Object.keys(REGION_DATA);
+            keys.forEach(id => {
+                const region = REGION_DATA[id];
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = region.name;
+                select.appendChild(opt);
+            });
+            if (keys.length > 0) {
+                select.value = keys[0];
+                applyRegion(keys[0]);
+            }
+        }
+
+        function applyRegion(regionId) {
+            const region = REGION_DATA[regionId];
+            if (!region) return;
+
+            const growthInput = document.getElementById('growthRate');
+            const avgPercent = region.avgGrowth10y * 100;
+            growthInput.value = avgPercent.toFixed(2);
+
+            const info = document.getElementById('regionInfo');
+            info.textContent =
+                region.name +
+                ': average ' +
+                avgPercent.toFixed(2) +
+                '% annual growth over the last 10 years (demo data).';
+
+            // Construir tabla de historial de 10 años
+            const container = document.getElementById('growthHistoryTable');
+            let html = '<table class="growth-table"><thead><tr>';
+            html += '<th>Year</th><th>Annual growth (%)</th>';
+            html += '</tr></thead><tbody>';
+
+            const years = [];
+            const ratesPercent = [];
+
+            region.history.forEach(row => {
+                years.push(row.year);
+                ratesPercent.push(row.rate * 100);
+
+                html += '<tr>';
+                html += '<td>' + row.year + '</td>';
+                html += '<td>' + (row.rate * 100).toFixed(2) + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Gráfica de crecimiento anual por año (región)
+            const ctxR = document.getElementById('regionGrowthChart').getContext('2d');
+            if (regionGrowthChart) {
+                regionGrowthChart.data.labels = years;
+                regionGrowthChart.data.datasets[0].data = ratesPercent;
+                regionGrowthChart.update();
+            } else {
+                regionGrowthChart = new Chart(ctxR, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [
+                            {
+                                label: 'Annual growth (%)',
+                                data: ratesPercent,
+                                borderColor: 'rgb(255, 159, 64)',
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Year' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Annual growth (%)' },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Recalcular toda la app con el nuevo growthRate
+            compute();
+        }
+
+        /* =========================================
+           Listeners y arranque
+           ========================================= */
         document.getElementById('propertyValue').addEventListener('input', compute);
         document.getElementById('weeklyRent').addEventListener('input', compute);
         document.getElementById('growthRate').addEventListener('input', compute);
         document.getElementById('years').addEventListener('input', compute);
         document.getElementById('currency').addEventListener('change', compute);
         document.getElementById('weeksSelect').addEventListener('change', compute);
+        document.getElementById('regionSelect').addEventListener('change', function (e) {
+            applyRegion(e.target.value);
+        });
 
+        // Inicialización general
+        initWeeksSelect();
+        populateRegionSelect();
         fetchExchangeRate();
     </script>
 </body>
