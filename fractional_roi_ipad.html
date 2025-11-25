@@ -8,8 +8,8 @@ Diferencias
 Registros
 
 fractional_roi_ipad.html
-+112
--23
++278
+-427
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,17 +17,13 @@ fractional_roi_ipad.html
     <meta charset="UTF-8">
     <!-- Vista móvil / iPad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Fractional ROI">
     <title>Fractional Rental & Growth Calculator</title>
-    <meta name="apple-mobile-web-app-title" content="Return of Investment Income Projection">
-    <title>Return of Investment Income Projection</title>
 
     <!-- Chart.js -->
+    <title>property management return of investment</title>
+    <!-- Include Chart.js from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
@@ -46,13 +42,14 @@ fractional_roi_ipad.html
         }
 
         body {
+            font-family: Arial, sans-serif;
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
             background: var(--bg);
             color: var(--text-main);
-            -webkit-text-size-adjust: 100%;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
-                env(safe-area-inset-left);
+            padding: 0;
+            background: #f5f5f5;
+            color: #333;
         }
 
         .app-shell {
@@ -65,12 +62,16 @@ fractional_roi_ipad.html
             width: 100%;
             max-width: 1200px;
             padding: 12px 16px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         h1 {
             text-align: center;
             margin: 8px 0 4px;
             font-size: clamp(1.4rem, 2vw + 1rem, 2rem);
+            margin-bottom: 10px;
         }
 
         .subtitle {
@@ -78,7 +79,75 @@ fractional_roi_ipad.html
             margin: 0 0 14px;
             font-size: 0.9rem;
             color: #666;
-@@ -108,50 +114,51 @@
+        }
+
+        /* PANEL DE INPUTS: GRID RESPONSIVO */
+        .inputs {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            /* Center the input groups rather than stretching them to the edges.  Using
+               justify-content:center gives a balanced layout regardless of the number
+               of controls per row. */
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.09);
+        }
+
+        @media (max-width: 900px) {
+            .inputs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .inputs {
+                grid-template-columns: 1fr;
+            }
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            font-weight: bold;
+            /* Allow long labels like "Weekly return of investment" to wrap cleanly */
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 10px 12px;
+            font-size: 16px; /* 16px para que iOS no haga zoom raro */
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.15);
         }
 
@@ -89,6 +158,12 @@ fractional_roi_ipad.html
             border-radius: 14px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.09);
             margin-bottom: 16px;
+        #results {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         #results p {
@@ -104,7 +179,6 @@ fractional_roi_ipad.html
 
         canvas {
             width: 100% !important;
-            height: 100%;
             max-height: 320px;
         }
 
@@ -118,6 +192,12 @@ fractional_roi_ipad.html
             margin-top: 16px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+        .chart-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         #incomeTable {
@@ -125,12 +205,17 @@ fractional_roi_ipad.html
             min-width: 520px; /* para que en pantallas pequeñas funcione el scroll horizontal */
             border-collapse: collapse;
             font-size: 0.88rem;
+            margin-top: 20px;
         }
 
         #incomeTable th,
         #incomeTable td {
+        #incomeTable th, #incomeTable td {
             border: 1px solid #ddd;
-@@ -162,201 +169,237 @@
+            padding: 6px 8px;
+            text-align: right;
+        }
+
         #incomeTable th {
             background-color: #f2f2f2;
             text-align: center;
@@ -155,35 +240,9 @@ fractional_roi_ipad.html
 
         footer a:hover {
             text-decoration: underline;
-        }
-
-        /* Ajustes específicos para iPhone / pantallas muy pequeñas */
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px 12px 18px;
-            }
-
-            h1 {
-                font-size: clamp(1.2rem, 5vw + 1rem, 1.6rem);
-            }
-
-            .inputs {
-                gap: 12px;
-            }
-
-            .input-group label {
-                font-size: 0.85rem;
-            }
-
-            .input-group input,
-            .input-group select {
-                font-size: 16px;
-                padding: 10px 11px;
-            }
-
-            canvas {
-                max-height: 280px;
-            }
+            font-size: 0.8rem;
+            color: #666;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -192,9 +251,8 @@ fractional_roi_ipad.html
     <div class="container">
         <h1>Fractional Rental &amp; Growth Calculator</h1>
         <p class="subtitle">Pensado para usarse cómodamente en iPad y otros dispositivos táctiles.</p>
-        <h1>Return of Investment Income Projection</h1>
-        <p class="subtitle">Optimizado para iPad y dispositivos móviles.</p>
 
+        <h1>property management return of investment</h1>
         <div class="inputs">
             <div class="input-group">
                 <label for="propertyValue">Property value (USD)</label>
@@ -202,7 +260,7 @@ fractional_roi_ipad.html
             </div>
             <div class="input-group">
                 <label for="weeklyRent">Weekly rental price (USD)</label>
-                <label for="weeklyRent">Weekly income projection (USD)</label>
+                <label for="weeklyRent">Weekly return of investment (USD)</label>
                 <input type="number" id="weeklyRent" value="3700" min="0" step="0.01">
             </div>
             <div class="input-group">
@@ -228,12 +286,7 @@ fractional_roi_ipad.html
                     <option value="3">3 weeks</option>
                     <option value="4">4 weeks</option>
                 </select>
-                <label for="weeksSelect">Weeks per year (up to 52)</label>
                 <select id="weeksSelect"></select>
-            </div>
-            <div class="input-group">
-                <label for="incomeInterest">Interest on income (%)</label>
-                <input type="number" id="incomeInterest" value="5" min="0" step="0.1">
             </div>
         </div>
 
@@ -241,20 +294,20 @@ fractional_roi_ipad.html
             <p><strong>Exchange rate (USD to MXN):</strong> <span id="rateDisplay">Fetching...</span></p>
             <p><strong>Current weekly rent:</strong> <span id="currentWeeklyDisplay">-</span></p>
             <p><strong>Annual rental income (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
-            <p><strong>Current weekly income:</strong> <span id="currentWeeklyDisplay">-</span></p>
-            <p><strong>Annual income (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
-            <p><strong>Interest on annual income (year 1):</strong> <span id="annualInterestYear1">-</span></p>
+            <p><strong>Current weekly return of investment:</strong> <span id="currentWeeklyDisplay">-</span></p>
+            <p><strong>Annual return of investment (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
         </div>
 
         <div class="chart-section">
             <h3>Property Value Projection</h3>
             <canvas id="growthChart"></canvas>
+            <canvas id="growthChart" height="200"></canvas>
+            <!-- Container to display total property value over the projection period -->
             <div id="propTotal"></div>
         </div>
 
         <div class="chart-section">
             <h3>Rental Income Projection</h3>
-            <h3>Income Projection</h3>
             <canvas id="incomeChart"></canvas>
 
             <div class="income-table-wrapper">
@@ -262,7 +315,11 @@ fractional_roi_ipad.html
             </div>
 
             <div id="gainSummary" style="margin-top: 10px;"></div>
-            <div id="interestWindow" style="margin-top: 10px;"></div>
+            <h3>Return of Investment Income Projection</h3>
+            <canvas id="incomeChart" height="200"></canvas>
+            <div id="incomeTableContainer"></div>
+            <!-- Container for combined gain summary -->
+            <div id="gainSummary" style="margin-top:15px;"></div>
         </div>
 
         <footer>
@@ -271,8 +328,8 @@ fractional_roi_ipad.html
                 <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener noreferrer">
                     fawazahmed0/exchange-api
                 </a>. Growth rate applies to both property value and rental price for projection.
-                </a>. Growth rate applies to both property value and income projection.
             </p>
+            <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and the return of investment income for projection purposes.</p>
         </footer>
     </div>
 </div>
@@ -304,10 +361,8 @@ fractional_roi_ipad.html
         const years = parseInt(document.getElementById('years').value) || 0;
         const currency = document.getElementById('currency').value;
         const weeksSelected = parseInt(document.getElementById('weeksSelect').value) || 1;
-        const incomeInterest = parseFloat(document.getElementById('incomeInterest').value) || 0;
 
         // Weekly rent year 0
-        // Weekly income year 0
         const weeklyRentUSD_current = weeklyRentUSD0;
         const weeklyRentMXN_current = exchangeRate ? weeklyRentUSD0 * exchangeRate : null;
         let weeklyRentDisplay;
@@ -321,6 +376,21 @@ fractional_roi_ipad.html
             weeklyRentDisplay = '$' + (weeklyMXN ? weeklyMXN.toFixed(2) : '…') + ' MXN';
             const annualMXN = weeklyMXN ? weeklyMXN * weeksSelected : null;
             incomeYear1 = annualMXN ? annualMXN.toFixed(2) + ' MXN' : '…';
+    <script>
+        let exchangeRate = null;
+        let growthChart, incomeChart;
+
+        async function fetchExchangeRate() {
+            try {
+                const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+                const data = await response.json();
+                exchangeRate = data.usd.mxn;
+                document.getElementById('rateDisplay').textContent = exchangeRate.toFixed(4) + ' (as of ' + data.date + ')';
+                compute();
+            } catch (error) {
+                document.getElementById('rateDisplay').textContent = 'Unable to retrieve rate';
+                console.error(error);
+            }
         }
 
         document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
@@ -338,11 +408,25 @@ fractional_roi_ipad.html
             const propValUSD = propertyValueUSD * Math.pow(1 + growthRate / 100, i);
             const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
             const incomeUSD = rentUSD * weeksSelected;
+        function compute() {
+            const propertyValueUSD = parseFloat(document.getElementById('propertyValue').value) || 0;
+            const weeklyRentUSD0 = parseFloat(document.getElementById('weeklyRent').value) || 0;
+            const growthRate = parseFloat(document.getElementById('growthRate').value) || 0;
+            const years = parseInt(document.getElementById('years').value) || 0;
+            const currency = document.getElementById('currency').value;
+            const weeksSelected = parseInt(document.getElementById('weeksSelect').value) || 1;
 
+            // Weekly rent and incomes for year 0
+            const weeklyRentUSD_current = weeklyRentUSD0;
+            const weeklyRentMXN_current = exchangeRate ? weeklyRentUSD0 * exchangeRate : null;
+            let weeklyRentDisplay;
+            let incomeYear1;
             if (currency === 'USD') {
                 propSeries.push(parseFloat(propValUSD.toFixed(2)));
                 rentSeries.push(parseFloat(rentUSD.toFixed(2)));
                 incomeSeries.push(parseFloat(incomeUSD.toFixed(2)));
+                weeklyRentDisplay = '$' + weeklyRentUSD_current.toFixed(2) + ' USD';
+                incomeYear1 = (weeklyRentUSD_current * weeksSelected).toFixed(2) + ' USD';
             } else {
                 const propValMXN = exchangeRate ? propValUSD * exchangeRate : null;
                 const rentMXN = exchangeRate ? rentUSD * exchangeRate : null;
@@ -350,13 +434,43 @@ fractional_roi_ipad.html
                 propSeries.push(propValMXN ? parseFloat(propValMXN.toFixed(2)) : null);
                 rentSeries.push(rentMXN ? parseFloat(rentMXN.toFixed(2)) : null);
                 incomeSeries.push(incomeMXN ? parseFloat(incomeMXN.toFixed(2)) : null);
+                const weeklyMXN = weeklyRentMXN_current;
+                weeklyRentDisplay = '$' + (weeklyMXN ? weeklyMXN.toFixed(2) : '…') + ' MXN';
+                const annualMXN = weeklyMXN ? weeklyMXN * weeksSelected : null;
+                incomeYear1 = annualMXN ? annualMXN.toFixed(2) + ' MXN' : '…';
+            }
+            document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
+            document.getElementById('annualIncomeYear1').textContent = incomeYear1;
+
+            // Arrays
+            const labels = [];
+            const propSeries = [];
+            const rentSeries = [];
+            const incomeSeries = [];
+
+            for (let i = 0; i <= years; i++) {
+                labels.push(i);
+                // Property value in USD
+                const propValUSD = propertyValueUSD * Math.pow(1 + growthRate / 100, i);
+                // Weekly rent in USD
+                const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
+                // Income for selected weeks in USD
+                const incomeUSD = rentUSD * weeksSelected;
+                // Convert values based on selected currency
+                if (currency === 'USD') {
+                    propSeries.push(parseFloat(propValUSD.toFixed(2)));
+                    rentSeries.push(parseFloat(rentUSD.toFixed(2)));
+                    incomeSeries.push(parseFloat(incomeUSD.toFixed(2)));
+                } else {
+                    const propValMXN = exchangeRate ? propValUSD * exchangeRate : null;
+                    const rentMXN = exchangeRate ? rentUSD * exchangeRate : null;
+                    const incomeMXN = exchangeRate ? incomeUSD * exchangeRate : null;
+                    propSeries.push(propValMXN ? parseFloat(propValMXN.toFixed(2)) : null);
+                    rentSeries.push(rentMXN ? parseFloat(rentMXN.toFixed(2)) : null);
+                    incomeSeries.push(incomeMXN ? parseFloat(incomeMXN.toFixed(2)) : null);
+                }
             }
         }
-
-        const incomeYear1Value = incomeSeries[1] || incomeSeries[0] || 0;
-        const interestYear1Value = incomeYear1Value * (incomeInterest / 100);
-        document.getElementById('annualInterestYear1').textContent =
-            '$' + interestYear1Value.toFixed(2) + ' ' + currency;
 
         // Growth chart
         const newGrowthLabel =
@@ -383,7 +497,73 @@ fractional_roi_ipad.html
                             tension: 0.1
                         }
                     ]
-@@ -387,154 +430,200 @@
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Years'
+            // Update growth chart
+            const newGrowthLabel = currency === 'USD' ? 'Property value (USD)' : 'Property value (MXN)';
+            if (growthChart) {
+                // Update data and dataset label
+                growthChart.data.labels = labels;
+                growthChart.data.datasets[0].data = propSeries;
+                growthChart.data.datasets[0].label = newGrowthLabel;
+                // Update y-axis title to reflect current currency
+                growthChart.options.scales.y.title.text = 'Property value (' + currency + ')';
+                growthChart.update();
+            } else {
+                const ctxG = document.getElementById('growthChart').getContext('2d');
+                growthChart = new Chart(ctxG, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: newGrowthLabel,
+                                data: propSeries,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Property value (' + currency + ')'
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Years'
+                                }
+                            },
+                            beginAtZero: false
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Property value (' + currency + ')'
+                                },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -403,6 +583,8 @@ fractional_roi_ipad.html
         // Income chart
         const weeksLabel =
             weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
+                });
+            }
 
         if (incomeChart) {
             incomeChart.data.labels = labels;
@@ -410,7 +592,6 @@ fractional_roi_ipad.html
             incomeChart.data.datasets[0].label = weeksLabel;
             incomeChart.options.scales.y.title.text =
                 'Annual rental income (' + currency + ')';
-                'Annual projected income (' + currency + ')';
             incomeChart.update();
         } else {
             const ctxI = document.getElementById('incomeChart').getContext('2d');
@@ -440,15 +621,63 @@ fractional_roi_ipad.html
                             title: {
                                 display: true,
                                 text: 'Years'
+            // Display final property value (at the end of projection) below the property chart
+            const propTotalElem = document.getElementById('propTotal');
+            const finalPropValue = propSeries[propSeries.length - 1] || 0;
+            // Format the final value
+            const formattedPropTotal = finalPropValue.toFixed(2);
+            propTotalElem.innerHTML = '<strong>Property value after ' + years + ' year' + (years !== 1 ? 's' : '') + ' (' + currency + '):</strong> ' + formattedPropTotal;
+
+            // Update income chart
+            const weeksLabel = weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
+            if (incomeChart) {
+                incomeChart.data.labels = labels;
+                incomeChart.data.datasets[0].data = incomeSeries;
+                incomeChart.data.datasets[0].label = weeksLabel;
+                // Update y-axis title to reflect current currency and ROI terminology
+                incomeChart.options.scales.y.title.text = 'Annual return of investment income (' + currency + ')';
+                incomeChart.update();
+            } else {
+                const ctxI = document.getElementById('incomeChart').getContext('2d');
+                incomeChart = new Chart(ctxI, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: weeksLabel,
+                                data: incomeSeries,
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                tension: 0.1
                             }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
                         },
                         y: {
                             title: {
                                 display: true,
                                 text: 'Annual rental income (' + currency + ')'
-                                text: 'Annual projected income (' + currency + ')'
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Years'
+                                }
                             },
                             beginAtZero: true
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Annual return of investment income (' + currency + ')'
+                                },
+                                beginAtZero: true
+                            }
                         }
                     }
                 }
@@ -460,7 +689,6 @@ fractional_roi_ipad.html
             '<table id="incomeTable"><thead><tr>' +
             '<th>Year</th>' +
             '<th>Weekly rent (' +
-            '<th>Weekly income (' +
             currency +
             ')</th>' +
             '<th>' +
@@ -511,7 +739,6 @@ fractional_roi_ipad.html
             '</p>';
         summaryHTML +=
             '<p><strong>Total rental income over ' +
-            '<p><strong>Total projected income over ' +
             years +
             ' year' +
             (years !== 1 ? 's' : '') +
@@ -522,48 +749,12 @@ fractional_roi_ipad.html
             '</p>';
         summaryHTML +=
             '<p><strong>Combined gain (property appreciation + rental income):</strong> ' +
-            '<p><strong>Combined gain (property appreciation + income):</strong> ' +
             formattedCombinedGain +
             ' ' +
             currency +
             '</p>';
 
         gainSummaryElem.innerHTML = summaryHTML;
-
-        // Interest window
-        const interestWindow = document.getElementById('interestWindow');
-        let balance = 0;
-        const interestRateDecimal = incomeInterest / 100;
-        const interestRows = [];
-
-        for (let i = 0; i <= years; i++) {
-            balance = (balance + (incomeSeries[i] || 0)) * (1 + interestRateDecimal);
-            interestRows.push({ year: i, balance });
-        }
-
-        const finalBalance = interestRows[interestRows.length - 1].balance || 0;
-        let interestHTML =
-            '<p><strong>Income reinvested at ' +
-            incomeInterest.toFixed(2) +
-            '% annual interest:</strong> ' +
-            finalBalance.toFixed(2) +
-            ' ' +
-            currency +
-            '</p>';
-        interestHTML += '<div class="income-table-wrapper"><table id="incomeTable"><thead><tr>';
-        interestHTML += '<th>Year</th><th>Balance with interest (' + currency + ')</th>';
-        interestHTML += '</tr></thead><tbody>';
-        interestRows.forEach((row) => {
-            interestHTML +=
-                '<tr><td style="text-align:center">' +
-                row.year +
-                '</td><td>' +
-                row.balance.toFixed(2) +
-                '</td></tr>';
-        });
-        interestHTML += '</tbody></table></div>';
-
-        interestWindow.innerHTML = interestHTML;
     }
 
     // Listeners
@@ -573,19 +764,68 @@ fractional_roi_ipad.html
     document.getElementById('years').addEventListener('input', compute);
     document.getElementById('currency').addEventListener('change', compute);
     document.getElementById('weeksSelect').addEventListener('change', compute);
-    document.getElementById('incomeInterest').addEventListener('input', compute);
-
-    // Populate weeks up to 52
-    const weeksSelect = document.getElementById('weeksSelect');
-    for (let i = 1; i <= 52; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i + ' week' + (i > 1 ? 's' : '');
-        weeksSelect.appendChild(option);
-    }
-    weeksSelect.value = '52';
+                });
+            }
 
     fetchExchangeRate();
 </script>
+            // Build table
+            let tableHTML = '<table id="incomeTable"><thead><tr>';
+            tableHTML += '<th>Year</th>';
+            tableHTML += '<th>Weekly ROI (' + currency + ')</th>';
+            tableHTML += '<th>' + weeksSelected + 'w income (' + currency + ')</th>';
+            tableHTML += '</tr></thead><tbody>';
+            for (let i = 0; i <= years; i++) {
+                tableHTML += '<tr>';
+                tableHTML += '<td style="text-align:center">' + i + '</td>';
+                const rentVal = rentSeries[i];
+                const incomeVal = incomeSeries[i];
+                tableHTML += '<td>' + (rentVal !== null ? rentVal.toFixed(2) : '…') + '</td>';
+                tableHTML += '<td>' + (incomeVal !== null ? incomeVal.toFixed(2) : '…') + '</td>';
+                tableHTML += '</tr>';
+            }
+            tableHTML += '</tbody></table>';
+            // Calculate total income across all projection years
+            const totalIncome = incomeSeries.reduce((sum, val) => sum + (val || 0), 0);
+            document.getElementById('incomeTableContainer').innerHTML = tableHTML;
+
+            // Update gain summary: property gain + rental income and show totals
+            const gainSummaryElem = document.getElementById('gainSummary');
+            // Initial property value is the value at year 0 in the current currency
+            const initialProp = propSeries[0] || 0;
+            const finalProp = propSeries[propSeries.length - 1] || 0;
+            const propertyGain = finalProp - initialProp;
+            const combinedGain = propertyGain + totalIncome;
+            // Format values to two decimals
+            const formattedPropGain = propertyGain.toFixed(2);
+            const formattedTotalIncome = totalIncome.toFixed(2);
+            const formattedCombinedGain = combinedGain.toFixed(2);
+            let summaryHTML = '';
+            summaryHTML += '<p><strong>Property appreciation over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedPropGain + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Total return of investment income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Property appreciation plus return of investment income:</strong> ' + formattedCombinedGain + ' ' + currency + '</p>';
+            gainSummaryElem.innerHTML = summaryHTML;
+        }
+
+        // Populate weeks 1–52 (default 4 weeks)
+        const weeksSelectElem = document.getElementById('weeksSelect');
+        for (let i = 1; i <= 52; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i + ' week' + (i > 1 ? 's' : '');
+            weeksSelectElem.appendChild(option);
+        }
+        weeksSelectElem.value = '4';
+
+        // Event listeners
+        document.getElementById('propertyValue').addEventListener('input', compute);
+        document.getElementById('weeklyRent').addEventListener('input', compute);
+        document.getElementById('growthRate').addEventListener('input', compute);
+        document.getElementById('years').addEventListener('input', compute);
+        document.getElementById('currency').addEventListener('change', compute);
+        document.getElementById('weeksSelect').addEventListener('change', compute);
+
+        fetchExchangeRate();
+    </script>
 </body>
 </html>
