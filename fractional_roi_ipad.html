@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>property management return of investment</title>
+    <title>Property Management Return on Investment
+</title>
     <!-- Include Chart.js from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -159,7 +160,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>property management return of investment</h1>
+        <h1>Property Management Return on Investment</h1>
 
         <!-- Panel de inputs principal -->
         <div class="inputs">
@@ -195,8 +196,8 @@
         <!-- Resultados de tipo resumen -->
         <div id="results">
             <p><strong>Exchange rate (USD to MXN):</strong> <span id="rateDisplay">Fetching...</span></p>
-            <p><strong>Current weekly return of investment:</strong> <span id="currentWeeklyDisplay">-</span></p>
-            <p><strong>Annual return of investment (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
+            <p><strong>Current weekly return on investment:</strong> <span id="currentWeeklyDisplay">-</span></p>
+            <p><strong>Annual return on investment (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
         </div>
 
         <!-- Gráfica de valor de la propiedad -->
@@ -208,7 +209,7 @@
 
         <!-- Gráfica de ingreso por ROI -->
         <div class="chart-section">
-            <h3>Return of Investment Income Projection</h3>
+            <h3>Return on Investment Income Projection</h3>
             <canvas id="incomeChart" height="200"></canvas>
             <div id="incomeTableContainer"></div>
             <div id="gainSummary" style="margin-top:15px;"></div>
@@ -242,7 +243,7 @@
         </div>
 
         <footer>
-            <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and the return of investment income for projection purposes.</p>
+            <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and the return on investment income for projection purposes.</p>
         </footer>
     </div>
 
@@ -401,7 +402,7 @@
                 incomeChart.data.labels = labels;
                 incomeChart.data.datasets[0].data = incomeSeries;
                 incomeChart.data.datasets[0].label = weeksLabel;
-                incomeChart.options.scales.y.title.text = 'Annual return of investment income (' + currency + ')';
+                incomeChart.options.scales.y.title.text = 'Annual return on investment income (' + currency + ')';
                 incomeChart.update();
             } else {
                 const ctxI = document.getElementById('incomeChart').getContext('2d');
@@ -428,7 +429,7 @@
                         scales: {
                             x: { title: { display: true, text: 'Years' } },
                             y: {
-                                title: { display: true, text: 'Annual return of investment income (' + currency + ')' },
+                                title: { display: true, text: 'Annual return on investment income (' + currency + ')' },
                                 beginAtZero: true
                             }
                         }
@@ -468,8 +469,8 @@
 
             let summaryHTML = '';
             summaryHTML += '<p><strong>Property appreciation over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedPropGain + ' ' + currency + '</p>';
-            summaryHTML += '<p><strong>Total return of investment income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
-            summaryHTML += '<p><strong>Property appreciation plus return of investment income:</strong> ' + formattedCombinedGain + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Total return on investment income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Property appreciation plus return on investment income:</strong> ' + formattedCombinedGain + ' ' + currency + '</p>';
             gainSummaryElem.innerHTML = summaryHTML;
         }
 
