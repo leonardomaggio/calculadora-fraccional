@@ -1,0 +1,19 @@
+[
+  {
+    "id": "cabo_punta_ballena",
+    "name": "Cabo San Lucas – Punta Ballena",
+    "country": "Mexico",
+    "region": "Baja California Sur",
+    "avgAnnual5y": 0.24,
+    "avgAnnual10y": 0.22,
+    "minAnnual": 0.12,
+    "maxAnnual": 0.3,
+    "refPropertyLabel": "Villa fraccional 3BR con vista al mar",
+    "refPropertyPrice": 2200000,
+    "currency": "USD",
+    "lastUpdated": "2025-12-05",
+    "sources": [
+      "manual-initial-seed"
+    ]
+  }
+]

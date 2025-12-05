@@ -513,6 +513,8 @@
             const region = REGION_DATA[regionId];
             if (!region) return;
 
+            loadMarketData(regionId);
+            
             // 1) Calcular promedio real a partir del historial
             let avgRate = region.avgGrowth10y || 0;
             if (region.history && region.history.length > 0) {
@@ -598,6 +600,27 @@
             // 6) Recalcular toda la app con el nuevo growthRate
             compute();
         }
+    async function loadMarketData(regionId) {
+        try {
+            const res = await fetch(`http://localhost:4000/markets/${regionId}`);
+            if (!res.ok) {
+                console.error("Failed to load market data", res.status);
+                return;
+            }
+
+            const market = await res.json();
+            console.log("Loaded market data:", market);
+
+            const growthRateInput = document.getElementById('growthRate');
+            if (growthRateInput && market.avgAnnual5y != null) {
+                // avgAnnual5y viene como 0.24 → lo convertimos a 24
+                growthRateInput.value = (market.avgAnnual5y * 100).toFixed(2);
+                compute(); // recalcula con el valor que vino del backend
+            }
+        } catch (err) {
+            console.error("Error loading market data", err);
+        }
+    }
 
         /* =========================================
            Listeners y arranque
