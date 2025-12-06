@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Management Return on Investment
-</title>
+    <title>Fractional Rental & Growth Calculator</title>
     <!-- Include Chart.js from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -27,7 +26,7 @@
         .inputs {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
             gap: 20px;
             margin-bottom: 20px;
             background: #fff;
@@ -43,8 +42,6 @@
         .input-group label {
             margin-bottom: 6px;
             font-weight: bold;
-            white-space: normal;
-            word-break: break-word;
         }
         .input-group input,
         .input-group select {
@@ -84,92 +81,24 @@
             background-color: #f2f2f2;
             text-align: center;
         }
-        /* Sección de regiones y tabla de 10 años */
-        .region-section h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        .region-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .region-controls label {
-            font-weight: bold;
-        }
-        .region-controls select {
-            padding: 6px 8px;
-            font-size: 0.95rem;
-        }
-        #regionInfo {
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .growth-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-        .growth-table th,
-        .growth-table td {
-            border: 1px solid #ddd;
-            padding: 6px 8px;
-            text-align: right;
-        }
-        .growth-table th {
-            background-color: #f2f2f2;
-            text-align: center;
-        }
-        .growth-table td:first-child {
-            text-align: center;
-        }
-        /* Bloque de publicidad */
-        .ad-slot {
-            background: #fffbe6;
-            border: 1px dashed #f0c36d;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #7a5a00;
-        }
-        .ad-slot small {
-            display: block;
-            margin-top: 6px;
-            color: #aa7a00;
-        }
         footer {
             text-align: center;
             font-size: 0.8rem;
             color: #666;
             margin: 20px 0;
         }
-        footer a {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Property Management Return on Investment</h1>
-
-        <!-- Panel de inputs principal -->
+        <h1>Fractional Rental &amp; Growth Calculator</h1>
         <div class="inputs">
             <div class="input-group">
                 <label for="propertyValue">Property value (USD)</label>
                 <input type="number" id="propertyValue" value="150000" min="0" step="0.01">
             </div>
             <div class="input-group">
-                <label for="weeklyRent">ROI per week (USD)</label>
+                <label for="weeklyRent">Weekly rental price (USD)</label>
                 <input type="number" id="weeklyRent" value="3700" min="0" step="0.01">
             </div>
             <div class="input-group">
@@ -189,94 +118,42 @@
             </div>
             <div class="input-group">
                 <label for="weeksSelect">Weeks per year</label>
-                <select id="weeksSelect"></select>
+                <select id="weeksSelect">
+                    <option value="1">1 week</option>
+                    <option value="2">2 weeks</option>
+                    <option value="3">3 weeks</option>
+                    <option value="4">4 weeks</option>
+                </select>
             </div>
         </div>
-
-        <!-- Resultados de tipo resumen -->
         <div id="results">
             <p><strong>Exchange rate (USD to MXN):</strong> <span id="rateDisplay">Fetching...</span></p>
-            <p><strong>Current weekly return on investment:</strong> <span id="currentWeeklyDisplay">-</span></p>
-            <p><strong>Annual return on investment (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
+            <p><strong>Current weekly rent:</strong> <span id="currentWeeklyDisplay">-</span></p>
+            <p><strong>Annual rental income (year 1):</strong> <span id="annualIncomeYear1">-</span></p>
         </div>
-
-        <!-- Gráfica de valor de la propiedad -->
         <div class="chart-section">
             <h3>Property Value Projection</h3>
             <canvas id="growthChart" height="200"></canvas>
+            <!-- Container to display total property value over the projection period -->
             <div id="propTotal"></div>
         </div>
-
-        <!-- Gráfica de ingreso por ROI -->
         <div class="chart-section">
-            <h3>Return on Investment Income Projection</h3>
+            <h3>Rental Income Projection</h3>
             <canvas id="incomeChart" height="200"></canvas>
             <div id="incomeTableContainer"></div>
+            <!-- Container for combined gain summary -->
             <div id="gainSummary" style="margin-top:15px;"></div>
         </div>
-
-        <!-- SECCIÓN: Cabo San Lucas, 10 años -->
-        <div class="chart-section region-section">
-            <h3>Cabo San Lucas 10-Year Property Growth</h3>
-            <div class="region-controls">
-                <label for="regionSelect">Location:</label>
-                <select id="regionSelect">
-                    <!-- Se llena por JavaScript -->
-                </select>
-            </div>
-            <p id="regionInfo">
-                Cabo San Lucas 10-year property value growth. Source: MLS Cabo San Lucas.
-            </p>
-
-            <!-- Gráfica histórica de crecimiento anual de la región -->
-            <canvas id="regionGrowthChart" height="200"></canvas>
-
-            <!-- Tabla de historial 10 años -->
-            <div id="growthHistoryTable"></div>
-        </div>
-
-        <!-- ESPACIO PARA PUBLICIDAD -->
-        <div id="adSlot" class="ad-slot">
-            <strong>Sponsored space</strong>
-            <div>Place your ad banner or partner promotion here.</div>
-            <small>(This is a placeholder. Here you can later insert Google AdSense, house ads, or sponsors.)</small>
-        </div>
-
         <footer>
-            <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and the return on investment income for projection purposes.</p>
+            <p>Exchange rates provided by <a href="https://github.com/fawazahmed0/exchange-api">fawazahmed0/exchange-api</a>. Growth rate applies both to property value and rental price for projection purposes.</p>
         </footer>
     </div>
 
     <script>
         let exchangeRate = null;
-        let growthChart, incomeChart, regionGrowthChart;
+        let growthChart, incomeChart;
 
-        /* =========================================================
-           Datos de Cabo San Lucas (más adelante vendrá de un backend)
-           ========================================================= */
-        const REGION_DATA = {
-            "cabo_punta_ballena": {
-                id: "cabo_punta_ballena",
-                name: "Cabo San Lucas, Baja California Sur, Mexico",
-                avgGrowth10y: 0.24, // valor de respaldo; el promedio real se calcula con history
-                history: [
-                    { year: 2015, rate: 0.12 },
-                    { year: 2016, rate: 0.13 },
-                    { year: 2017, rate: 0.14 },
-                    { year: 2018, rate: 0.16 },
-                    { year: 2019, rate: 0.18 },
-                    { year: 2020, rate: 0.19 },
-                    { year: 2021, rate: 0.22 },
-                    { year: 2022, rate: 0.24 },
-                    { year: 2023, rate: 0.25 },
-                    { year: 2024, rate: 0.25 }
-                ]
-            }
-        };
-
-        /* =========================================
-           Carga de tipo de cambio USD -> MXN
-           ========================================= */
+        // 1) Tipo de cambio USD -> MXN
         async function fetchExchangeRate() {
             try {
                 const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
@@ -290,9 +167,31 @@
             }
         }
 
-        /* =========================================
-           Cálculos principales de la calculadora
-           ========================================= */
+        // 2) Cargar datos de mercado desde tu backend local
+        async function fetchMarketData() {
+            try {
+                // mercado fijo por ahora: cabo_punta_ballena
+                const res = await fetch('http://localhost:4000/markets/cabo_punta_ballena');
+                if (!res.ok) {
+                    console.error('Failed to load market data', res.status);
+                    return;
+                }
+
+                const market = await res.json();
+                console.log('Loaded market data:', market);
+
+                const growthInput = document.getElementById('growthRate');
+                if (growthInput && market.avgAnnual5y != null) {
+                    // 0.24 -> 24.00
+                    growthInput.value = (market.avgAnnual5y * 100).toFixed(2);
+                    compute();
+                }
+            } catch (err) {
+                console.error('Error loading market data', err);
+            }
+        }
+
+        // 3) Cálculos principales
         function compute() {
             const propertyValueUSD = parseFloat(document.getElementById('propertyValue').value) || 0;
             const weeklyRentUSD0 = parseFloat(document.getElementById('weeklyRent').value) || 0;
@@ -318,7 +217,7 @@
             document.getElementById('currentWeeklyDisplay').textContent = weeklyRentDisplay;
             document.getElementById('annualIncomeYear1').textContent = incomeYear1;
 
-            // Arrays para las gráficas
+            // Arrays
             const labels = [];
             const propSeries = [];
             const rentSeries = [];
@@ -332,7 +231,7 @@
                 const rentUSD = weeklyRentUSD0 * Math.pow(1 + growthRate / 100, i);
                 // Income for selected weeks in USD
                 const incomeUSD = rentUSD * weeksSelected;
-
+                // Convert values based on selected currency
                 if (currency === 'USD') {
                     propSeries.push(parseFloat(propValUSD.toFixed(2)));
                     rentSeries.push(parseFloat(rentUSD.toFixed(2)));
@@ -347,7 +246,7 @@
                 }
             }
 
-            // Gráfica de valor de propiedad
+            // Update growth chart
             const newGrowthLabel = currency === 'USD' ? 'Property value (USD)' : 'Property value (MXN)';
             if (growthChart) {
                 growthChart.data.labels = labels;
@@ -379,10 +278,16 @@
                         },
                         scales: {
                             x: {
-                                title: { display: true, text: 'Years' }
+                                title: {
+                                    display: true,
+                                    text: 'Years'
+                                }
                             },
                             y: {
-                                title: { display: true, text: 'Property value (' + currency + ')' },
+                                title: {
+                                    display: true,
+                                    text: 'Property value (' + currency + ')'
+                                },
                                 beginAtZero: false
                             }
                         }
@@ -390,19 +295,19 @@
                 });
             }
 
-            // Valor final de la propiedad
+            // Display final property value
             const propTotalElem = document.getElementById('propTotal');
             const finalPropValue = propSeries[propSeries.length - 1] || 0;
             const formattedPropTotal = finalPropValue.toFixed(2);
             propTotalElem.innerHTML = '<strong>Property value after ' + years + ' year' + (years !== 1 ? 's' : '') + ' (' + currency + '):</strong> ' + formattedPropTotal;
 
-            // Gráfica de ingreso anual por ROI
+            // Update income chart
             const weeksLabel = weeksSelected + ' week' + (weeksSelected > 1 ? 's' : '') + ' / year (' + currency + ')';
             if (incomeChart) {
                 incomeChart.data.labels = labels;
                 incomeChart.data.datasets[0].data = incomeSeries;
                 incomeChart.data.datasets[0].label = weeksLabel;
-                incomeChart.options.scales.y.title.text = 'Annual return on investment income (' + currency + ')';
+                incomeChart.options.scales.y.title.text = 'Annual rental income (' + currency + ')';
                 incomeChart.update();
             } else {
                 const ctxI = document.getElementById('incomeChart').getContext('2d');
@@ -427,9 +332,17 @@
                             intersect: false,
                         },
                         scales: {
-                            x: { title: { display: true, text: 'Years' } },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Years'
+                                }
+                            },
                             y: {
-                                title: { display: true, text: 'Annual return on investment income (' + currency + ')' },
+                                title: {
+                                    display: true,
+                                    text: 'Annual rental income (' + currency + ')'
+                                },
                                 beginAtZero: true
                             }
                         }
@@ -437,10 +350,10 @@
                 });
             }
 
-            // Tabla de ingreso por año
+            // Build table
             let tableHTML = '<table id="incomeTable"><thead><tr>';
             tableHTML += '<th>Year</th>';
-            tableHTML += '<th>Weekly ROI (' + currency + ')</th>';
+            tableHTML += '<th>Weekly rent (' + currency + ')</th>';
             tableHTML += '<th>' + weeksSelected + 'w income (' + currency + ')</th>';
             tableHTML += '</tr></thead><tbody>';
             for (let i = 0; i <= years; i++) {
@@ -456,7 +369,7 @@
             const totalIncome = incomeSeries.reduce((sum, val) => sum + (val || 0), 0);
             document.getElementById('incomeTableContainer').innerHTML = tableHTML;
 
-            // Resumen de ganancias
+            // Gain summary
             const gainSummaryElem = document.getElementById('gainSummary');
             const initialProp = propSeries[0] || 0;
             const finalProp = propSeries[propSeries.length - 1] || 0;
@@ -466,179 +379,24 @@
             const formattedPropGain = propertyGain.toFixed(2);
             const formattedTotalIncome = totalIncome.toFixed(2);
             const formattedCombinedGain = combinedGain.toFixed(2);
-
             let summaryHTML = '';
             summaryHTML += '<p><strong>Property appreciation over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedPropGain + ' ' + currency + '</p>';
-            summaryHTML += '<p><strong>Total return on investment income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
-            summaryHTML += '<p><strong>Property appreciation plus return on investment income:</strong> ' + formattedCombinedGain + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Total rental income over ' + years + ' year' + (years !== 1 ? 's' : '') + ':</strong> ' + formattedTotalIncome + ' ' + currency + '</p>';
+            summaryHTML += '<p><strong>Combined gain (property appreciation + rental income):</strong> ' + formattedCombinedGain + ' ' + currency + '</p>';
             gainSummaryElem.innerHTML = summaryHTML;
         }
 
-        /* =========================================
-           Poblado de weeksSelect (1 a 52 semanas)
-           ========================================= */
-        function initWeeksSelect() {
-            const weeksSelectElem = document.getElementById('weeksSelect');
-            weeksSelectElem.innerHTML = '';
-            for (let i = 1; i <= 52; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i + ' week' + (i > 1 ? 's' : '');
-                weeksSelectElem.appendChild(option);
-            }
-            weeksSelectElem.value = '4';
-        }
-
-        /* =========================================
-           Lógica de región (Cabo San Lucas)
-           ========================================= */
-        function populateRegionSelect() {
-            const select = document.getElementById('regionSelect');
-            select.innerHTML = '';
-            const keys = Object.keys(REGION_DATA);
-            keys.forEach(id => {
-                const region = REGION_DATA[id];
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = region.name;
-                select.appendChild(opt);
-            });
-            if (keys.length > 0) {
-                select.value = keys[0];
-                applyRegion(keys[0]);
-            }
-        }
-
-        function applyRegion(regionId) {
-            const region = REGION_DATA[regionId];
-            if (!region) return;
-
-            loadMarketData(regionId);
-            
-            // 1) Calcular promedio real a partir del historial
-            let avgRate = region.avgGrowth10y || 0;
-            if (region.history && region.history.length > 0) {
-                const total = region.history.reduce((sum, row) => sum + (row.rate || 0), 0);
-                avgRate = total / region.history.length;
-            }
-            const avgPercent = avgRate * 100;
-
-            // 2) Poner ese promedio en Annual growth rate (%)
-            const growthInput = document.getElementById('growthRate');
-            growthInput.value = avgPercent.toFixed(2);
-
-            // 3) Texto de info con promedio correcto y fuente MLS
-            const info = document.getElementById('regionInfo');
-            info.textContent =
-                region.name +
-                ': average ' +
-                avgPercent.toFixed(2) +
-                '% annual growth over the last 10 years. Source: MLS Cabo San Lucas.';
-
-            // 4) Construir tabla de historial de 10 años
-            const container = document.getElementById('growthHistoryTable');
-            let html = '<table class="growth-table"><thead><tr>';
-            html += '<th>Year</th><th>Annual growth (%)</th>';
-            html += '</tr></thead><tbody>';
-
-            const years = [];
-            const ratesPercent = [];
-
-            region.history.forEach(row => {
-                years.push(row.year);
-                const ratePercent = (row.rate || 0) * 100;
-                ratesPercent.push(ratePercent);
-
-                html += '<tr>';
-                html += '<td>' + row.year + '</td>';
-                html += '<td>' + ratePercent.toFixed(2) + '</td>';
-                html += '</tr>';
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
-
-            // 5) Gráfica de crecimiento anual por año (región)
-            const ctxR = document.getElementById('regionGrowthChart').getContext('2d');
-            if (regionGrowthChart) {
-                regionGrowthChart.data.labels = years;
-                regionGrowthChart.data.datasets[0].data = ratesPercent;
-                regionGrowthChart.update();
-            } else {
-                regionGrowthChart = new Chart(ctxR, {
-                    type: 'line',
-                    data: {
-                        labels: years,
-                        datasets: [
-                            {
-                                label: 'Annual growth (%)',
-                                data: ratesPercent,
-                                borderColor: 'rgb(255, 159, 64)',
-                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                tension: 0.1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        scales: {
-                            x: {
-                                title: { display: true, text: 'Year' }
-                            },
-                            y: {
-                                title: { display: true, text: 'Annual growth (%)' },
-                                beginAtZero: false
-                            }
-                        }
-                    }
-                });
-            }
-
-            // 6) Recalcular toda la app con el nuevo growthRate
-            compute();
-        }
-    async function loadMarketData(regionId) {
-        try {
-            const res = await fetch(`http://localhost:4000/markets/${regionId}`);
-            if (!res.ok) {
-                console.error("Failed to load market data", res.status);
-                return;
-            }
-
-            const market = await res.json();
-            console.log("Loaded market data:", market);
-
-            const growthRateInput = document.getElementById('growthRate');
-            if (growthRateInput && market.avgAnnual5y != null) {
-                // avgAnnual5y viene como 0.24 → lo convertimos a 24
-                growthRateInput.value = (market.avgAnnual5y * 100).toFixed(2);
-                compute(); // recalcula con el valor que vino del backend
-            }
-        } catch (err) {
-            console.error("Error loading market data", err);
-        }
-    }
-
-        /* =========================================
-           Listeners y arranque
-           ========================================= */
+        // Event listeners
         document.getElementById('propertyValue').addEventListener('input', compute);
         document.getElementById('weeklyRent').addEventListener('input', compute);
         document.getElementById('growthRate').addEventListener('input', compute);
         document.getElementById('years').addEventListener('input', compute);
         document.getElementById('currency').addEventListener('change', compute);
         document.getElementById('weeksSelect').addEventListener('change', compute);
-        document.getElementById('regionSelect').addEventListener('change', function (e) {
-            applyRegion(e.target.value);
-        });
 
-        // Inicialización general
-        initWeeksSelect();
-        populateRegionSelect();
+        // Inicialización
         fetchExchangeRate();
+        fetchMarketData();
     </script>
 </body>
 </html>
