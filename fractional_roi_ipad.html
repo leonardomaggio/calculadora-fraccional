@@ -100,7 +100,13 @@
             <div class="input-group">
                 <label for="weeklyRent">Weekly rental price (USD)</label>
                 <input type="number" id="weeklyRent" value="3700" min="0" step="0.01">
-            </div>
+            </div>        <div class="input-group">
+            <label for="marketSelect">Location</label>
+            <select id="marketSelect">
+                <option value="">Loading markets…</option>
+            </select>
+        </div>
+
             <div class="input-group">
                 <label for="growthRate">Annual growth rate (%)</label>
                 <input type="number" id="growthRate" value="24" min="0" step="0.1">
@@ -168,27 +174,48 @@
         }
 
         // 2) Cargar datos de mercado desde tu backend local
-        async function fetchMarketData() {
+                let marketsIndex = [];
+
+        async function loadMarketsIndex() {
             try {
-                // mercado fijo por ahora: cabo_punta_ballena
-                const res = await fetch('http://localhost:4000/markets/cabo_punta_ballena');
+                const res = await fetch('./data/markets.json', { cache: 'no-store' });
                 if (!res.ok) {
-                    console.error('Failed to load market data', res.status);
+                    console.error('Failed to load data/markets.json', res.status);
                     return;
                 }
 
-                const market = await res.json();
-                console.log('Loaded market data:', market);
+                marketsIndex = await res.json();
 
-                const growthInput = document.getElementById('growthRate');
-                if (growthInput && market.avgAnnual5y != null) {
-                    // 0.24 -> 24.00
-                    growthInput.value = (market.avgAnnual5y * 100).toFixed(2);
-                    compute();
+                const select = document.getElementById('marketSelect');
+                if (!select) return;
+
+                select.innerHTML = '';
+                marketsIndex.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.name;
+                    select.appendChild(opt);
+                });
+
+                if (marketsIndex.length) {
+                    select.value = marketsIndex[0].id;
+                    applyMarket(marketsIndex[0].id);
                 }
             } catch (err) {
-                console.error('Error loading market data', err);
+                console.error('Error loading markets.json', err);
             }
+        }
+
+        function applyMarket(marketId) {
+            const m = marketsIndex.find(x => x.id === marketId);
+            if (!m) return;
+
+            const growthInput = document.getElementById('growthRate');
+            if (growthInput && m.avgAnnual5y != null) {
+                growthInput.value = (m.avgAnnual5y * 100).toFixed(2);
+            }
+
+            compute();
         }
 
         // 3) Cálculos principales
@@ -393,10 +420,10 @@
         document.getElementById('years').addEventListener('input', compute);
         document.getElementById('currency').addEventListener('change', compute);
         document.getElementById('weeksSelect').addEventListener('change', compute);
-
+        document.getElementById('marketSelect').addEventListener('change', (e) => applyMarket(e.target.value));
         // Inicialización
         fetchExchangeRate();
-        fetchMarketData();
+        loadMarketsIndex();
     </script>
 </body>
 </html>
